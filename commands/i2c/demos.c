@@ -103,3 +103,51 @@ void demo_si7021(struct command_result *res){
 	sn[7]=data[3]; 	
 	printf("Serial Number: 0x%02x%02x%02x%02x%02x%02x%02x%02x\r\n", sn[7],sn[6],sn[5],sn[4],sn[3],sn[2],sn[1],sn[0]);
 }
+
+void demo_ssd1306(struct *command_result res) {
+	uint8_t data[25];
+	const uint8_t dp_logo = { 0x00 }; // Dangerous Prototypes logo will be here
+	const uint8_t command_prefix = 0x00;
+	const uint8_t data_prefix = 0x40;
+	const uint8_t ssd1306_addr = 0x3C; // 7-bit address
+	// go through initial setup
+	data[0] = 0xAE; // display off
+	data[1] = 0xD5; // divide ratio & osc freq to..
+	data[2] = 0x80; // defaults
+	data[3] = 0xA8; // multiplex ratio to..
+	data[4] = 0x1F; // 32 MUX
+	data[5] = 0xD3; // vertical shift to...
+	data[6] = 0x00; // none
+	data[7] = 0x40; // display RAM start line is 0
+	data[8] = 0x8D;
+	data[9] = 0x14;
+	data[10] = 0x20; // addressing mode to...
+	data[11] = 0x00; // horizontal addressing
+	data[12] = 0xA1; // segment remap
+	data[13] = 0xC8; // reverse scan direction
+	data[14] = 0xDA; // set COM mapping to...
+	data[15] = 0x02; // regular mapping
+	data[16] = 0x81; // set contrast to...
+	data[17] = 0x2F; // about 25% (really brightness, not contrast)
+	data[18] = 0xD9; // set precharge value to...
+	data[19] = 0xF1; // the recommended value
+	data[20] = 0xD8; // set VCOMH deselect leve to...
+	data[21] = 0x40; // the recommended value
+	data[22] = 0xA4; // do not fill the display with white 
+	data[23] = 0xA6; // non-inverted display (normal display mode)
+	data[24] = 0xAF; // enable display
+
+	printf("Initializing display...\r\n");
+	uint8_t builtCommand[2] = { command_prefix, 0x00 };
+	// Send the entire initialization sequence
+	for(int i = 0; i < 25; i++) {
+		builtCommand[1] = data[i];
+		if(pio_i2c_write_blocking_timeout(ssd1306_addr, builtCommand, 2, 0xffff)) return;
+	}
+	printf("Sending example bitmap...\r\n");
+	builtCommand[0] = data_prefix;
+	for(int i = 0; i < 512; i++) {
+		// send the DP logo
+	}
+	
+}
